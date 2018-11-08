@@ -191,6 +191,15 @@ void returnMemory(Block* block) {
 	printf("Block ends at %d, top is %d\n", endOfBlock, sbrk(0));
 
 	if(endOfBlock == sbrk(0)) {
+		if(tail == block) {
+			tail = block -> prev;
+			printf("This block was tail\n");
+		}
+		if(head == block) {
+			head = block-> next;
+			printf("This block was head\n");
+		}
+
 		size_t requestSize = -1 * (block->size + sizeof(Block));
 		printf("Requesting: %d\n", requestSize );
 		void *request = (Block *) sbrk(requestSize);
@@ -222,7 +231,7 @@ void _free(void * ptr) {
 int main() {
 
 	//void *init = sbrk(1);5
-	Block *Block1 = _malloc(4000);
+	Block *Block1 = _malloc(4037);
 //	printf("--------------\n");
 //	Block *Block2 = _malloc(1);
 //	printf("--------------\n");
@@ -236,7 +245,9 @@ int main() {
 
 	printf("--------------\n");
 
-	//Block *Block4 = _malloc(10);
+
+
+	Block *Block4 = _malloc(10);
 
 	return 0;
 }
