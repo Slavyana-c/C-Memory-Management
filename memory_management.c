@@ -163,6 +163,11 @@ void * _malloc(size_t size) {
 	}
 
 	int padding = getPadding(block);
+	int *savePadding = (int*) ((void *)block + sizeof(Block) + padding);
+
+	*savePadding = padding;
+	printf("4444444\n%ld = %d\n", savePadding, *savePadding);
+
 	printf("\n\n\nBlock: %ld, Size: %d, Padd_Space: %d, padding: %d \n\n\n", (long)block, sizeof(Block), PADDING_SIZE_SPACE, padding);
 	Block *ptr = (Block*) ((void*) block + sizeof(Block) + PADDING_SIZE_SPACE + padding);
 	return (ptr);
@@ -250,13 +255,14 @@ void printList() {
 
 int main() {
 
-	int sum = 100;
+	int sum = 1;
 
-	while (sum <= 500) {
+	while (sum <= 100) {
 		Block *Block1 = _malloc(sum);
-		sum += 100;
+		sum += 15;
 		printf("------------------------\n");
-		printf("Address: %ld\n", Block1);
+		int *ptr= (void *)Block1 - 1;
+		printf("Address: %ld, padding %ld\n", Block1, *ptr);
 		printf("------------------------\n");
 	}
 
