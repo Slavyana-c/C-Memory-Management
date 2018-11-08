@@ -157,28 +157,35 @@ void * _malloc(size_t size) {
 	return (Block*)((void*)block + sizeof(Block));
 }
 
-void merge(Block *freeBlock) {
+Block* merge(Block *freeBlock) {
 
 	Block *prevBlock = freeBlock->prev;
 	Block *nextBlock = freeBlock->next;
 
 
 	if (prevBlock != NULL && prevBlock->free) {
+		printf("Previous block is free, size -> %d\n", prevBlock->size);
 		prevBlock->size += freeBlock->size + sizeof(Block);
 		prevBlock->next = freeBlock->next;
 		freeBlock = prevBlock;
 		nextBlock = freeBlock->next;
-		printf("Previous block is free");
+
 	}
 
 	if (nextBlock != NULL && nextBlock->free) {
+		printf("Next block is free, size -> %d\n", nextBlock->size);
 		freeBlock->size += nextBlock->size + sizeof(Block);
 		freeBlock->next = nextBlock->next;
-		printf("Next block is free");
 	}
 
 	printf("Successfully merged\n");
 	printf("New block of size %ld\n", freeBlock->size);
+
+	return freeBlock;
+
+}
+
+void returnMemory() {
 
 }
 
@@ -190,7 +197,10 @@ void _free(void * ptr) {
 	printf("Freed %d, size %d\n", block, block->size);
 
 	//if((block->prev != NULL && block->prev->free )|| (block->next != NULL && block->prev->free ))
-	merge(block);
+	Block *mergedBlock = merge(block);
+
+	//returnMemory(mergedBlock);
+
 }
 
 int main() {
@@ -204,8 +214,9 @@ int main() {
 	printf("--------------\n");
 
 	printf("%d %d %d\n", Block1, Block2, Block3);
-	_free(Block2);
+	_free(Block1);
 	_free(Block3);
+	_free(Block2);
 
 
 	return 0;
