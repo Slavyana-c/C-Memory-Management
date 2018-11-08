@@ -57,7 +57,7 @@ Block *requestMemory(size_t size) {
 		tail = newBlock;
 	}
 
-	newBlock->size = requestSize;
+	newBlock->size = requestSize - sizeof(Block);
 	newBlock->next = NULL;
 	newBlock->free = 1;
 	return newBlock;
@@ -92,6 +92,18 @@ Block *findFreeBlock(size_t size) {
 	return bestBlock;
 }
 
+void split(Block *bigBlock, size_t size) {
+	Block *new = (void*) ((void*) bigBlock + size + sizeof(Block));
+	new->size = (bigBlock->size) - size - sizeof(Block);
+	new->free = 1;
+	new->next = bigBlock->next;
+	bigBlock->size = size;
+	bigBlock->free = 0;
+	bigBlock->next = new;
+	printf("Split successful: Block1: %ld, Block2: %ld\n", bigBlock->size,
+			new->size);
+}
+
 void * _malloc(size_t size) {
 	Block *block;
 
@@ -121,11 +133,10 @@ void * _malloc(size_t size) {
 
 	// Found free block
 	else {
-		// TODO: consider splitting block here.
 		printf("Found free block!\n");
 		if (block->size > size) {
 			printf("Needs splitting\n");
-			//split(block, size);
+			split(block, size);
 			block->free = 0;
 		} else {
 			block->free = 0;
@@ -137,7 +148,7 @@ void * _malloc(size_t size) {
 
 int main() {
 
-	Block *firstBlock = _malloc(0);
+	Block *firstBlock = _malloc(100);
 
 	return 0;
 }
