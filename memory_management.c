@@ -9,6 +9,7 @@
 #include "memory_management.h"
 
 #define MIN_BLOCK_SIZE 4096.0
+#define PADDING_SIZE_SPACE 1
 
 typedef struct block {
 	size_t size;
@@ -20,6 +21,18 @@ typedef struct block {
 Block *head = NULL;
 Block *tail = NULL;
 
+int getPadding(void *ptr) {
+	int padding = 0;
+
+	printf("%%%%%%%%%%%%%%%\n");
+	printf(" ptr %ld, remainder = %ld\n", (long)ptr, ((long) ptr + PADDING_SIZE_SPACE + sizeof(Block)) % 8);
+	if (((long) ptr + PADDING_SIZE_SPACE + sizeof(Block)) % 8 != 0) {
+		padding = 8 - ((long) ptr + PADDING_SIZE_SPACE + sizeof(Block)) % 8;
+	}
+
+	return padding;
+}
+
 // Requests memory and returns a new block
 Block *requestMemory(size_t size) {
 	Block *newBlock = (Block*) sbrk(0);
@@ -27,7 +40,8 @@ Block *requestMemory(size_t size) {
 
 	// Request memory of size that is a multiple of 4096
 	size_t requestSize = ceil(
-			(size + sizeof(Block)) / MIN_BLOCK_SIZE) * MIN_BLOCK_SIZE;
+			(size + PADDING_SIZE_SPACE + getPadding(newBlock) + sizeof(Block))
+					/ MIN_BLOCK_SIZE) * MIN_BLOCK_SIZE;
 	void *request = (Block *) sbrk(requestSize);
 
 	printf("Size: %ld, Block: %ld\n", size, sizeof(Block));
@@ -53,15 +67,6 @@ Block *requestMemory(size_t size) {
 	return newBlock;
 }
 
-int getPadding(Block *block) {
-	int padding = 1;
-	if ((long) block % 8 != 0) {
-		padding = 8 - ((long) block % 8);
-	}
-
-	return padding;
-}
-
 // Returns a free block with enough memory, if any
 Block *findFreeBlock(size_t size) {
 	Block *currentBlock = head;
@@ -73,8 +78,9 @@ Block *findFreeBlock(size_t size) {
 	while (currentBlock != NULL) {
 
 		padding = getPadding(currentBlock);
+		printf("Block: %ld, Block++ %ld\n", (long)currentBlock, (long)(void *) currentBlock + PADDING_SIZE_SPACE);
 		printf("Expected padding - %d\n", padding);
-		if (!currentBlock->free || currentBlock->size + padding < size) {
+		if (!currentBlock->free || currentBlock->size + padding + PADDING_SIZE_SPACE < size) {
 			printf("Block checked, not free\n");
 		} else {
 			printf("Found free block %ld of size %ld\n", (long) currentBlock,
@@ -95,9 +101,9 @@ Block *findFreeBlock(size_t size) {
 
 // Splits block if possible
 void split(Block *bigBlock, size_t size) {
-	//int padding = getPadding(bigBlock);
+	int padding = getPadding(bigBlock);
 
-	Block *new = (void*) ((void*) bigBlock + size + sizeof(Block));
+	Block *new = (void*) ((void*) bigBlock + size + padding + PADDING_SIZE_SPACE +sizeof(Block));
 	new->size = (bigBlock->size) - size - sizeof(Block);
 	new->free = 1;
 	new->prev = bigBlock;
@@ -141,6 +147,7 @@ void * _malloc(size_t size) {
 	// Found free block
 	//printf("Found free block!\n");
 	tail = block;
+
 	if (block->size - size > sizeof(Block)) {
 		printf("Needs splitting\n");
 		split(block, size);
@@ -153,9 +160,12 @@ void * _malloc(size_t size) {
 		} else {
 			printf("Perfect size\n");
 		}
-
 	}
-	return ((Block*) ((void*) block + sizeof(Block)));
+
+	int padding = getPadding(block);
+	printf("\n\n\nBlock: %ld, Size: %d, Padd_Space: %d, padding: %d \n\n\n", (long)block, sizeof(Block), PADDING_SIZE_SPACE, padding);
+	Block *ptr = (Block*) ((void*) block + sizeof(Block) + PADDING_SIZE_SPACE + padding);
+	return (ptr);
 }
 
 // Merges blocks when possible
@@ -240,14 +250,17 @@ void printList() {
 
 int main() {
 
-	int sum = 10;
+	int sum = 100;
 
-	while (sum <= 50) {
-		//Block *Block1 = _malloc(sum);
-		sum += 5;
+	while (sum <= 500) {
+		Block *Block1 = _malloc(sum);
+		sum += 100;
+		printf("------------------------\n");
+		printf("Address: %ld\n", Block1);
+		printf("------------------------\n");
 	}
 
-	printList();
+	//printList();
 //	Block *Block1 = _malloc(4037);
 //	printf("--------------\n");
 //	Block *Block4 = _malloc(4);
