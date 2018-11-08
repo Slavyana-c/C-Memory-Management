@@ -79,7 +79,7 @@ Block *findFreeBlock(size_t size) {
 
 			printf("Block checked, not free\n");
 		} else {
-			printf("Found free block of size %d\n", currentBlock->size);
+			printf("Found free block %d of size %d\n",currentBlock, currentBlock->size);
 			sizeDifference = currentBlock->size - size;
 			if (sizeDifference < minDifference) {
 				printf("New best block!- min diff: %d\n", sizeDifference);
@@ -109,6 +109,7 @@ void split(Block *bigBlock, size_t size) {
 			new->size);
 }
 
+// Returns
 void * _malloc(size_t size) {
 	Block *block;
 
@@ -152,15 +153,17 @@ void * _malloc(size_t size) {
 		}
 
 	}
-
-	return block + 1;
+	printf("Block: %d, Returning %d\n", block, block+1);
+	return block + sizeof(block);
 }
 
 void merge(Block *freeBlock) {
+
 	Block *prevBlock = freeBlock->prev;
 	Block *nextBlock = freeBlock->next;
 
-	if (prevBlock->free) {
+
+	if (prevBlock != NULL && prevBlock->free) {
 		prevBlock->size += freeBlock->size + sizeof(Block);
 		prevBlock->next = freeBlock->next;
 		freeBlock = prevBlock;
@@ -168,7 +171,7 @@ void merge(Block *freeBlock) {
 		printf("Previous block is free");
 	}
 
-	if (nextBlock->free) {
+	if (nextBlock != NULL && nextBlock->free) {
 		freeBlock->size += nextBlock->size + sizeof(Block);
 		freeBlock->next = nextBlock->next;
 		printf("Next block is free");
@@ -180,9 +183,9 @@ void merge(Block *freeBlock) {
 }
 
 void _free(void * ptr) {
-	Block* block = ptr - 1;
+	Block* block = (Block *)ptr - sizeof(Block);
 	block->free = 1;
-	printf("Freed %p\n", ptr);
+	printf("Freed %d, size %d\n", block, block->size);
 	merge(block);
 }
 
@@ -194,7 +197,9 @@ int main() {
 	Block *Block2 = _malloc(1);
 	printf("--------------\n");
 	Block *Block3 = _malloc(4);
-
+	printf("--------------\n");
+	_free(Block1);
+	_free(Block2);
 
 
 	return 0;
