@@ -124,31 +124,63 @@ void * _malloc(size_t size) {
 	// Failed to find free block.
 	if (block == NULL) {
 		printf("No free block found\n");
-//		     block = requestMemory(size);
-//		     if (!block)
-//		     {
-//		         return NULL;
-//		     }
+		block = requestMemory(size);
+		if (!block) {
+			return NULL;
+		}
 	}
 
 	// Found free block
-	else {
-		printf("Found free block!\n");
-		if (block->size > size) {
-			printf("Needs splitting\n");
-			split(block, size);
-			block->free = 0;
-		} else {
-			block->free = 0;
-			printf("Perfect size\n");
-		}
+	printf("Found free block!\n");
+	if (block->size > size) {
+		printf("Needs splitting\n");
+		split(block, size);
+		block->free = 0;
+	} else {
+		block->free = 0;
+		printf("Perfect size\n");
 	}
+
 	return block + 1;
+}
+
+void merge(Block *freeBlock) {
+	Block *prevBlock = freeBlock->prev;
+	Block *nextBlock = freeBlock->next;
+
+	if (prevBlock->free) {
+		prevBlock->size += freeBlock->size + sizeof(Block);
+		prevBlock->next = freeBlock->next;
+		freeBlock = prevBlock;
+		nextBlock = freeBlock->next;
+		printf("Previous block is free");
+	}
+
+	if (nextBlock->free) {
+		freeBlock->size += nextBlock->size + sizeof(Block);
+		freeBlock->next = nextBlock->next;
+		printf("Next block is free");
+	}
+
+	printf("Successfully merged\n");
+	printf("New block of size %ld\n", freeBlock->size);
+
+}
+
+void _free(void * ptr) {
+	Block* block = ptr - 1;
+	block->free = 1;
+	printf("Freed %p\n", ptr);
+	merge(block);
 }
 
 int main() {
 
-	Block *firstBlock = _malloc(100);
+	Block *Block1 = _malloc(4000);
+	Block *Block2 = _malloc(1);
+	//Block *Block3 = _malloc(4);
+
+
 
 	return 0;
 }
