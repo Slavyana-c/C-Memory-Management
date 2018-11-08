@@ -153,8 +153,8 @@ void * _malloc(size_t size) {
 		}
 
 	}
-	printf("Block: %d, Returning %d\n", block, block+1);
-	return block + sizeof(block);
+	printf("Block: %d, %d, Returning %d\n", block, sizeof(Block), (Block*)((void *)block + 5));
+	return (Block*)((void*)block + sizeof(Block));
 }
 
 void merge(Block *freeBlock) {
@@ -183,9 +183,13 @@ void merge(Block *freeBlock) {
 }
 
 void _free(void * ptr) {
-	Block* block = (Block *)ptr - sizeof(Block);
+
+	printf("%d\n", ptr);
+	Block* block = (Block*)(ptr - sizeof(Block));
 	block->free = 1;
 	printf("Freed %d, size %d\n", block, block->size);
+
+	//if((block->prev != NULL && block->prev->free )|| (block->next != NULL && block->prev->free ))
 	merge(block);
 }
 
@@ -198,8 +202,10 @@ int main() {
 	printf("--------------\n");
 	Block *Block3 = _malloc(4);
 	printf("--------------\n");
-	_free(Block1);
+
+	printf("%d %d %d\n", Block1, Block2, Block3);
 	_free(Block2);
+	_free(Block3);
 
 
 	return 0;
