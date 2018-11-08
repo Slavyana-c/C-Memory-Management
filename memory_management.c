@@ -51,9 +51,11 @@ Block *requestMemory(size_t size) {
 		return NULL;
 		printf("Request failed\n");
 	}
-	if (tail) { // NULL on first request.
+	if (tail != NULL) { // NULL on first request.
 		tail->next = newBlock;
 		newBlock->prev = tail;
+		tail = newBlock;
+	} else {
 		tail = newBlock;
 	}
 
@@ -96,10 +98,13 @@ void split(Block *bigBlock, size_t size) {
 	Block *new = (void*) ((void*) bigBlock + size + sizeof(Block));
 	new->size = (bigBlock->size) - size - sizeof(Block);
 	new->free = 1;
+	new->prev = bigBlock;
 	new->next = bigBlock->next;
 	bigBlock->size = size;
 	bigBlock->free = 0;
 	bigBlock->next = new;
+
+	tail = new;
 	printf("Split successful: Block1: %ld, Block2: %ld\n", bigBlock->size,
 			new->size);
 }
@@ -131,14 +136,21 @@ void * _malloc(size_t size) {
 	}
 
 	// Found free block
-	printf("Found free block!\n");
-	if (block->size > size) {
+	//printf("Found free block!\n");
+	if (block->size - size > sizeof(Block)) {
 		printf("Needs splitting\n");
 		split(block, size);
 		block->free = 0;
 	} else {
 		block->free = 0;
-		printf("Perfect size\n");
+		//printf("Formula: %d\n", block->size - size - sizeof(Block));
+		if((int)(block->size - size - sizeof(Block)) < 0) {
+			printf("Not perfect size, but can't be split\n");
+		}
+		else {
+			printf("Perfect size\n");
+		}
+
 	}
 
 	return block + 1;
@@ -176,9 +188,12 @@ void _free(void * ptr) {
 
 int main() {
 
+	//void *init = sbrk(1);5
 	Block *Block1 = _malloc(4000);
+	printf("--------------\n");
 	Block *Block2 = _malloc(1);
-	//Block *Block3 = _malloc(4);
+	printf("--------------\n");
+	Block *Block3 = _malloc(4);
 
 
 
