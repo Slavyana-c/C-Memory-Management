@@ -185,7 +185,23 @@ Block* merge(Block *freeBlock) {
 
 }
 
-void returnMemory() {
+void returnMemory(Block* block) {
+
+	void *endOfBlock = (void*)block + sizeof(Block) + block->size;
+	printf("Block ends at %d, top is %d\n", endOfBlock, sbrk(0));
+
+	if(endOfBlock == sbrk(0)) {
+		size_t requestSize = -1 * (block->size + sizeof(Block));
+		printf("Requesting: %d\n", requestSize );
+		void *request = (Block *) sbrk(requestSize);
+//			// Command failure
+		if (request == (void*) -1) {
+				printf("Request failed\n");
+				return;
+		} else {
+			printf("new %d\n", sbrk(0));
+		}
+	}
 
 }
 
@@ -199,7 +215,7 @@ void _free(void * ptr) {
 	//if((block->prev != NULL && block->prev->free )|| (block->next != NULL && block->prev->free ))
 	Block *mergedBlock = merge(block);
 
-	//returnMemory(mergedBlock);
+	returnMemory(mergedBlock);
 
 }
 
@@ -207,17 +223,20 @@ int main() {
 
 	//void *init = sbrk(1);5
 	Block *Block1 = _malloc(4000);
-	printf("--------------\n");
-	Block *Block2 = _malloc(1);
-	printf("--------------\n");
-	Block *Block3 = _malloc(4);
-	printf("--------------\n");
+//	printf("--------------\n");
+//	Block *Block2 = _malloc(1);
+//	printf("--------------\n");
+//	Block *Block3 = _malloc(4);
+//	printf("--------------\n");
 
-	printf("%d %d %d\n", Block1, Block2, Block3);
+	//printf("%d %d %d\n", Block1, Block2, Block3);
 	_free(Block1);
-	_free(Block3);
-	_free(Block2);
+//	_free(Block3);
+//	_free(Block2);
 
+	printf("--------------\n");
+
+	//Block *Block4 = _malloc(10);
 
 	return 0;
 }
