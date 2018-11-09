@@ -1,3 +1,8 @@
+/* memory_management.c
+ * Created by: Slavyana Chervenkondeva
+ * references: Danluu, Malloc tutorial, https://danluu.com/malloc-tutorial/
+ */
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <stddef.h>
@@ -10,6 +15,7 @@
 
 #define MIN_BLOCK_SIZE 4096.0
 
+// The Block headers
 typedef struct block
 {
 	size_t size;
@@ -152,7 +158,6 @@ void *_malloc(size_t size)
 }
 
 // Merges blocks when possible
-
 Block *merge(Block *freeBlock)
 {
 
@@ -249,8 +254,26 @@ void printList() {
 	}
 }
 
+
+// Some testing
 int main()
 {
+	int sum = 10;
 
+	while (sum <= 50) {
+		Block *Block1 = _malloc(sum);
+		sum += 5;
+		printf("Addr:%ld\n----------------------\n", (long)Block1);
+		_free(Block1);
+	}
+
+	Block *Block1 = _malloc(4037);
+	printf("--------------\n");
+	Block *Block4 = _malloc(4);
+
+	_free(Block4);
+		_free(Block1);
+
+	//printList();
 	return 0;
 }
