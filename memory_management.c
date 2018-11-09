@@ -272,7 +272,7 @@ int main()
 	Block *Block4 = _malloc(4);
 
 	_free(Block4);
-		_free(Block1);
+	_free(Block1);
 
 	//printList();
 	return 0;
