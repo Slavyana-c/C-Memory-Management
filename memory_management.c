@@ -207,7 +207,7 @@ void returnMemory(Block* block) {
 			(long) sbrk(0));
 
 	if (endOfBlock == sbrk(0)) {
-	
+
 		if(block->prev != NULL) {
 			block->prev->next = NULL;
 		}
@@ -252,28 +252,4 @@ void printList() {
 		current = current->next;
 		i++;
 	}
-}
-
-
-// Some testing
-int main()
-{
-	int sum = 10;
-
-	while (sum <= 50) {
-		Block *Block1 = _malloc(sum);
-		sum += 5;
-		printf("Addr:%ld\n----------------------\n", (long)Block1);
-		_free(Block1);
-	}
-
-	Block *Block1 = _malloc(4037);
-	printf("--------------\n");
-	Block *Block4 = _malloc(4);
-
-	_free(Block4);
-	_free(Block1);
-
-	//printList();
-	return 0;
 }
